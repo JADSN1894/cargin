@@ -63,11 +63,29 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Release
-      uses: softprops/action-gh-release@v1
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
       with:
-        files: |
-          ~/.cargo/bin/*
-        
-        body: |
-          Release for all packages
+        node-version: 'lts'
+
+    - name: Install dependencies
+      run: npm install -g @actions/github-script@v7
+
+    - name: Create Release
+      run: |
+        github.script('
+          const tag = "vX.Y.Z"; // Replace with your version
+          const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+          const { data: release } = await octokit.repos.createRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: tag,
+            name: "Release " + tag,
+            body: "Release notes for " + tag,
+            draft: false,
+            prerelease: false,
+          });
+          console.log("Created release:", release);
+        ');
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
