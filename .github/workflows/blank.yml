@@ -24,20 +24,23 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up Rust
-      uses: actions/setup-rust@v1
+      uses: actions/monorepo-rust@v1
       with:
         rust-version: stable
 
-    - name: Install serde
-      run: cargo install serde
+    - name: Install icx-asset
+      run: cargo install icx-asset
 
-    - name: Install your_crate
-      run: cargo install your_crate
+    - name: Install icx-cert
+      run: cargo install icx-cert
+
+    - name: Install icx-proxy
+      run: cargo install icx-proxy
 
     - name: Create Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: rust-artifacts
         path: |
-          ~/.cargo/bin/serde   # Adjust the path to the installed serde binary
-          ~/.cargo/bin/your_crate   # Adjust the path to the installed your_crate binary
+          ~/.cargo/bin/icx-asset
+          ~/.cargo/bin/icx-cert
