@@ -19,6 +19,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        package:
+          - icx-asset
+          - icx-cert
+          - icx-proxy
+          
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -30,20 +37,15 @@ jobs:
         profile: minimal
         cache-base: main
 
-    - name: Install icx-asset
-      run: cargo install icx-asset
-
-    - name: Install icx-cert
-      run: cargo install icx-cert
-
-    - name: Install icx-proxy
-      run: cargo install icx-proxy
+    - name: Install Dependencies
+      run: cargo install ${{ matrix.package }}
+      
+    - name: Add Execute Permission
+      run: chmod +x ~/.cargo/bin/${{ matrix.package }}
 
     - name: Create Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: rust-artifacts
+        name: artifacts-${{ matrix.package }}
         path: |
-          ~/.cargo/bin/icx-asset
-          ~/.cargo/bin/icx-cert
-          ~/.cargo/bin/icx-proxy
+          ~/.cargo/bin/${{ matrix.package }}
