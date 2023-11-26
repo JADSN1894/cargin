@@ -62,25 +62,37 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
-
-    - name: Fetch Latest Tag
-      run: |
-        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null)
-        if [ -z "$latest_tag" ]; then
-          # If no tags exist, create an initial tag
-          git tag -a v1.0.0 -m "Initial Release"
-          git push origin v1.0.0
-          latest_tag="v1.0.0"
-        fi
-        echo "Latest Tag: $latest_tag"
-
+    
     - name: Bump Version
-      run: |
-        # Bump the version (adjust 'patch' to 'minor' or 'major' based on your versioning strategy)
-        new_version=$(gh release bump $latest_tag --files=~/.cargo/bin/* --title "Release $new_version" --notes "Release notes for $new_version")
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          const semver = require('semver');
 
-        # Create a new release
-        gh release create $new_version --notes "Release notes for $new_version" --title "Release $new_version" --files=target/release/*
+          try {
+            // Fetch the latest tag
+            const latestTag = execSync('git describe --tags --abbrev=0').toString().trim();
+
+            // Bump the version (adjust 'patch' to 'minor' or 'major' based on your versioning strategy)
+            const newVersion = semver.inc(latestTag.replace('v', ''), 'patch');
+
+            // Create a new tag if it doesn't exist
+            if (!latestTag) {
+              execSync(`git tag -a v${newVersion} -m "Initial Release"`);
+              execSync(`git push origin v${newVersion}`);
+              console.log(`Created initial tag v${newVersion}`);
+            } else {
+              console.log(`Latest Tag: ${latestTag}`);
+            }
+
+            // Print the new version
+            console.log(`Bumped Version: v${newVersion}`);
+          } catch (error) {
+            core.setFailed(error.message);
+          }
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
