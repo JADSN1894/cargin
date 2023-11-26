@@ -40,9 +40,6 @@ jobs:
     - name: Install Dependencies
       run: cargo install ${{ matrix.package }}
       
-    - name: Add Execute Permission
-      run: chmod +x ~/.cargo/bin/${{ matrix.package }}
-
     - name: Create Artifact
       uses: actions/upload-artifact@v3
       #with: # Alternative 1
@@ -56,7 +53,7 @@ jobs:
       #    ~/.cargo/bin/${{ matrix.package }} 
       with: # Alternative 3
         name: rust-artifacts
-        path: target/release/
+        path: ~/.cargo/bin
         
   release:
     needs: build
@@ -70,7 +67,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          target/release/*
+          ~/.cargo/bin/*
         
         body: |
           Release for all packages
