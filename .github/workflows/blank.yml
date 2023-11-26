@@ -45,7 +45,32 @@ jobs:
 
     - name: Create Artifact
       uses: actions/upload-artifact@v3
+      #with: # Alternative 1
+      #name: rust-artifacts
+      #  path: |
+      #    ~/.cargo/bin/crate_1
+      #    ~/.cargo/bin/crate_2
+      #with: # Alternative 2
+      #  name: artifacts-${{ matrix.package }}
+      #  path: |
+      #    ~/.cargo/bin/${{ matrix.package }} 
+      with: # Alternative 3
+        name: rust-artifacts
+        path: target/release/
+        
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
       with:
-        name: artifacts-${{ matrix.package }}
-        path: |
-          ~/.cargo/bin/${{ matrix.package }}
+        files: |
+          target/release/*
+        
+        body: |
+          Release for all packages
