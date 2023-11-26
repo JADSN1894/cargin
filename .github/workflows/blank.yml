@@ -80,7 +80,7 @@ jobs:
 
           try {
             // Fetch the latest tag
-            const latestTag = execSync('git describe --tags --abbrev=0').toString().trim();
+            const latestTag = execSync('git describe --tags `git rev-list --tags --max-count=1`').toString().trim();
 
             // Bump the version (adjust 'patch' to 'minor' or 'major' based on your versioning strategy)
             const newVersion = semver.inc(latestTag.replace('v', ''), 'patch');
