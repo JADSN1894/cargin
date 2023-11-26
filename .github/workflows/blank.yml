@@ -21,12 +21,14 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Rust
       uses: moonrepo/setup-rust@v1
       with:
-        rust-version: stable
+        channel: stable
+        profile: minimal
+        cache-base: main
 
     - name: Install icx-asset
       run: cargo install icx-asset
@@ -44,3 +46,4 @@ jobs:
         path: |
           ~/.cargo/bin/icx-asset
           ~/.cargo/bin/icx-cert
+          ~/.cargo/bin/icx-proxy
