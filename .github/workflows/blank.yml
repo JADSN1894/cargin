@@ -22,9 +22,9 @@ jobs:
     strategy:
       matrix:
         package:
-          - icx-asset
+          #- icx-asset
           - icx-cert
-          - icx-proxy
+          #- icx-proxy
           
     steps:
     - name: Checkout Repository
@@ -66,7 +66,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 'lts'
+        node-version: 20
 
     - name: Install dependencies
       run: npm install -g @actions/github-script@v7
@@ -74,9 +74,9 @@ jobs:
     - name: Create Release
       run: |
         github.script('
-          const tag = "vX.Y.Z"; // Replace with your version
+          const tag = "v1.0.0"; // Replace with your version
           const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
-          const { data: release } = await octokit.repos.createRelease({
+          const { data: rHow to bump the release version based on olderelease } = await octokit.repos.createRelease({
             owner: context.repo.owner,
             repo: context.repo.repo,
             tag_name: tag,
