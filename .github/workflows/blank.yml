@@ -1,0 +1,43 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '59 23 28-31 * *'  # Runs at 11:00 PM UTC on the 28th, 29th, 30th, and 31st day of each month
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Rust
+      uses: actions/setup-rust@v1
+      with:
+        rust-version: stable
+
+    - name: Install serde
+      run: cargo install serde
+
+    - name: Install your_crate
+      run: cargo install your_crate
+
+    - name: Create Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: rust-artifacts
+        path: |
+          ~/.cargo/bin/serde   # Adjust the path to the installed serde binary
+          ~/.cargo/bin/your_crate   # Adjust the path to the installed your_crate binary
