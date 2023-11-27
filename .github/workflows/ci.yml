@@ -65,13 +65,17 @@ jobs:
       run: |
         git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
         git config --global user.name "${GITHUB_ACTOR}"
-        
+
+    - name: Get Timestamp
+      id: timestamp
+      run: echo "::set-output name=timestamp::$(date +'%Y%m%d%H%M%S')"
+
     - name: Create and Push Tag
-      run: git tag -a crate-${{ matrix.crate_name }} -m "Release crate-${{ matrix.crate_name }}"
+      run: git tag -a crate-${{ matrix.crate_name }}-${{ steps.timestamp.outputs.timestamp }} -m "Release crate-${{ matrix.crate_name }}-${{ steps.timestamp.outputs.timestamp }}"
       if: github.event_name == 'push'
 
     - name: Push Tag
-      run: git push origin crate-${{ matrix.crate_name }}
+      run: git push origin crate-${{ matrix.crate_name }}-${{ steps.timestamp.outputs.timestamp }}
       if: github.event_name == 'push'
 
     - name: Release
