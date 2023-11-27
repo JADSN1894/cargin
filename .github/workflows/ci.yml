@@ -53,9 +53,6 @@ jobs:
       with: # Alternative 3
         name: rust-artifacts
         path: ~/.cargo/bin
-        
-    - name: Use orhun/git-cliff-action
-      uses: orhun/git-cliff-action@v2
 
     - name: Set up Git
       run: |
@@ -64,19 +61,18 @@ jobs:
 
     - name: Get Timestamp
       id: timestamp
-      run: echo "::set-output name=timestamp::$(date +'%Y%m%d%H%M%S')"
-
+      run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+      
     - name: Create and Push Tag
-      run: git tag -a crate-${{ matrix.crate_name }}-${{ steps.timestamp.outputs.timestamp }} -m "Release crate-${{ matrix.crate_name }}-${{ steps.timestamp.outputs.timestamp }}"
+      run: git tag -a crate-${{ matrix.crate_name }}-${{ env.TIMESTAMP }} -m "Release crate-${{ matrix.crate_name }}-${{ env.TIMESTAMP }}"
       if: github.event_name == 'push'
 
     - name: Push Tag
-      run: git push origin crate-${{ matrix.crate_name }}-${{ steps.timestamp.outputs.timestamp }}
+      run: git push origin crate-${{ matrix.crate_name }}-${{ env.TIMESTAMP }}
       if: github.event_name == 'push'
 
     - name: Release
       uses: ncipollo/release-action@v1
       with:
         artifacts: "~/.cargo/bin/${{ matrix.crate_name }}"
-        bodyFile: "RELEASE_NOTES.md"
-        tag: crate-${{ matrix.crate_name }}-${{ steps.timestamp.outputs.timestamp }}
+        tag: crate-${{ matrix.crate_name }}-${{ env.TIMESTAMP }}
