@@ -5,8 +5,12 @@ on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
+    tags:
+      - '*'
   pull_request:
     branches: [ "main" ]
+    tags:
+      - '*'
   schedule:
     - cron: '59 23 28-31 * *'  # Runs at 11:00 PM UTC on the 28th, 29th, 30th, and 31st day of each month
 
