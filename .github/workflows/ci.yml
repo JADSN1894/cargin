@@ -38,6 +38,11 @@ jobs:
     - name: Generate Release Notes
       run: git-cliff
 
+    - name: Set up Git
+      run: |
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git config --global user.name "${GITHUB_ACTOR}"
+        
     - name: Create and Push Tag
       run: git tag -a v${{ matrix.crate_name }} -m "Release v${{ matrix.crate_name }}"
       if: github.event_name == 'push'
