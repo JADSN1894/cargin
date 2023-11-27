@@ -47,24 +47,35 @@ jobs:
       
     - name: Create Artifact
       uses: actions/upload-artifact@v3
-      with:
-        name: rust-artifacts
+      #with: # Alternative 1
+      #name: rust-artifacts
+      #  path: |
+      #    ~/.cargo/bin/crate_1
+      #    ~/.cargo/bin/crate_2
+      with: # Alternative 2
+        name: ${{ matrix.crate_name }}
         path: |
-          ~/.cargo/bin/${{ matrix.crate_name }}
+          ~/.cargo/bin/${{ matrix.crate_name }} 
+      #with: # Alternative 3
+      #  name: rust-artifacts
+      #  path: ~/.cargo/bin
 
-    # Setup git :: Create and Push tag
-    - name: Build and Push All Crates Tag
+    - name: Set up Git
       run: |
-          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git config --global user.name "${GITHUB_ACTOR}"
-          git tag -a all_crates_${{ env.TIMESTAMP }} -m "Release all crates ${GITHUB_SHA}"
-          git push origin all_crates_${{ env.TIMESTAMP }}
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git config --global user.name "${GITHUB_ACTOR}"
+      
+    - name: Create and Push Tag
+      run: git tag -a crate_${{ matrix.crate_name }}_${{ env.TIMESTAMP }} -m "Release crate_${{ matrix.crate_name }}_${{ env.TIMESTAMP }}"
+      if: github.event_name == 'push'
+
+    - name: Push Tag
+      run: git push origin crate_${{ matrix.crate_name }}_${{ env.TIMESTAMP }}
       if: github.event_name == 'push'
 
     - name: Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "~/.cargo/bin/icx-asset, ~/.cargo/bin/icx-cert, ~/.cargo/bin/icx-proxy"
-        tag: all_crates_${{ env.TIMESTAMP }}
-        name: All Crates
-      if: github.event_name == 'push'
+        artifacts: "~/.cargo/bin/${{ matrix.crate_name }}"
+        tag: crate_${{ matrix.crate_name }}_${{ env.TIMESTAMP }}
+        name: ${{ matrix.crate_name }}
