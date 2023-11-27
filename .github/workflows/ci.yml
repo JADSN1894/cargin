@@ -16,6 +16,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       matrix:
         crate_name:
@@ -24,6 +26,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up Rust
       uses: moonrepo/setup-rust@v1
@@ -31,9 +35,9 @@ jobs:
         channel: stable
         profile: minimal
         cache-base: main
-
-    - name: Install git-cliff
-      run: cargo install git-cliff
+    
+    - name: Use orhun/git-cliff-action
+      uses: orhun/git-cliff-action@v2
 
     - name: Generate Release Notes
       run: git-cliff
@@ -44,20 +48,15 @@ jobs:
         git config --global user.name "${GITHUB_ACTOR}"
         
     - name: Create and Push Tag
-      run: git tag -a v${{ matrix.crate_name }} -m "Release v${{ matrix.crate_name }}"
+      run: git tag -a crate-${{ matrix.crate_name }} -m "Release crate-${{ matrix.crate_name }}"
       if: github.event_name == 'push'
 
     - name: Push Tag
-      run: git push origin v${{ matrix.crate_name }}
+      run: git push origin crate-${{ matrix.crate_name }}
       if: github.event_name == 'push'
 
     - name: Release
-      uses: ncipollo/release-action@v1
+    - uses: ncipollo/release-action@v1
       with:
-        token: ${{ secrets.CARGIN_TOKEN }}
-        tag: v${{ matrix.crate_name }}
-        title: Release v${{ matrix.crate_name }}
-        name: Release v${{ matrix.crate_name }}
-        files: |
-          ~/.cargo/bin
-        body_file: RELEASE_NOTES.md
+        artifacts: "~/.cargo/bin/*"
+        bodyFile: "RELEASE_NOTES.md"
