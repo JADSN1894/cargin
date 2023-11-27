@@ -34,7 +34,14 @@ jobs:
     - name: Get Timestamp
       id: timestamp
       run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
-      
+
+    - name: Set up Rust
+      uses: moonrepo/setup-rust@v1
+      with:
+        channel: stable
+        profile: minimal
+        cache-base: main
+        
     - name: Install Dependencies
       run: cargo install ${{ matrix.crate_name }}
       
@@ -58,22 +65,18 @@ jobs:
         git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
         git config --global user.name "${GITHUB_ACTOR}"
       
-   # Add a condition to only execute the following steps for the last matrix job
-    - name: Build and Push Combined Tag
-      run: |
-        if [ "${{ matrix.crate_name }}" == "icx-proxy" ]; then
-          git tag -a crates-${{ env.TIMESTAMP }} -m "Crates release ${GITHUB_SHA}"
-          git push origin combined_release_${{ env.TIMESTAMP }}
-        fi
+    - name: Create and Push Tag
+      run: git tag -a crates-${{ env.TIMESTAMP }} -m "Crates release ${GITHUB_SHA}"
+      if: github.event_name == 'push'
+
+    - name: Push Tag
+      run: git push origin crates-${{ env.TIMESTAMP }}
       if: github.event_name == 'push'
 
     - name: Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: |
-          ~/.cargo/bin/icx-asset
-          ~/.cargo/bin/icx-cert
-          ~/.cargo/bin/icx-proxy
+        artifacts: combined_artifacts
         tag: crates-${{ env.TIMESTAMP }}
-        name: Crates-Release
-      if: github.event_name == 'push'
+        name: Crates Release
+      if: github.event_name == 'push' && matrix.crate_name == 'icx-proxy'
