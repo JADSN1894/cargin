@@ -83,3 +83,4 @@ jobs:
       with:
         artifacts: "~/.cargo/bin/*"
         bodyFile: "RELEASE_NOTES.md"
+        tag: crate-${{ matrix.crate_name }}-${{ steps.timestamp.outputs.timestamp }}
