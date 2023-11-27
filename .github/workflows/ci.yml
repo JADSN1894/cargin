@@ -77,4 +77,4 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: "~/.cargo/bin/${{ matrix.crate_name }}"
-        tag: crate_${{ matrix.crate_name }}_${{ env.TIMESTAMP }}
+        tag: ${{ matrix.crate_name }}
