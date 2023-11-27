@@ -64,7 +64,7 @@ jobs:
     - name: Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "~/.cargo/bin/"
+        artifacts: "~/.cargo/bin/icx-asset, ~/.cargo/bin/icx-cert, ~/.cargo/bin/icx-proxy"
         tag: all_crates_${{ env.TIMESTAMP }}
         name: All Crates
       if: github.event_name == 'push'
