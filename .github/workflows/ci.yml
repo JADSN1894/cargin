@@ -55,7 +55,7 @@ jobs:
     - name: Release
       uses: ncipollo/release-action@v1
       with:
-        token: ${{ secrets.CARGIN_TOKEN }}
+        token: ${{ secrets.CARGIN_SECRET_TOKEN }}
         tag: v${{ matrix.crate_name }}
         title: Release v${{ matrix.crate_name }}
         name: Release v${{ matrix.crate_name }}
