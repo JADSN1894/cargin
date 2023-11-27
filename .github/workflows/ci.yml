@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the workflow will run
@@ -22,9 +20,9 @@ jobs:
     strategy:
       matrix:
         package:
-          #- icx-asset
+          - icx-asset
           - icx-cert
-          #- icx-proxy
+          - icx-proxy
           
     steps:
     - name: Checkout Repository
@@ -40,49 +38,12 @@ jobs:
     - name: Install Dependencies
       run: cargo install ${{ matrix.package }}
       
-    - name: Install Dependencies
-      run: cargo install ${{ matrix.package }}
-      
+    - name: Add Execute Permission
+      run: chmod +x ~/.cargo/bin/${{ matrix.package }}
+
     - name: Create Artifact
       uses: actions/upload-artifact@v3
-      #with: # Alternative 1
-      #name: rust-artifacts
-      #  path: |
-      #    ~/.cargo/bin/crate_1
-      #    ~/.cargo/bin/crate_2
-      #with: # Alternative 2
-      #  name: artifacts-${{ matrix.package }}
-      #  path: |
-      #    ~/.cargo/bin/${{ matrix.package }} 
-      with: # Alternative 3
-        name: rust-artifacts
-        path: ~/.cargo/bin
-        
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
       with:
-          fetch-depth: 0
-
-    - name: Set up Git
-      run: |
-        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-        git config --global user.name "${GITHUB_ACTOR}"
-        
-    - name: Create and Push Tag
-      run: git tag -a crate-${{ matrix.crate_name }} -m "Release crate-${{ matrix.crate_name }}"
-      if: github.event_name == 'push'
-
-    - name: Push Tag
-      run: git push origin crate-${{ matrix.crate_name }}
-      if: github.event_name == 'push'
-
-    - name: Release
-    - uses: ncipollo/release-action@v1
-      with:
-        artifacts: "~/.cargo/bin/*"
-        bodyFile: "RELEASE_NOTES.md"
+        name: artifacts-${{ matrix.package }}
+        path: |
+          ~/.cargo/bin/${{ matrix.package }}
