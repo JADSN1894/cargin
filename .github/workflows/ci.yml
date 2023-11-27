@@ -57,9 +57,6 @@ jobs:
     - name: Use orhun/git-cliff-action
       uses: orhun/git-cliff-action@v2
 
-    - name: Install git-cliff
-      run: cargo install git-cliff
-
     - name: Set up Git
       run: |
         git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
