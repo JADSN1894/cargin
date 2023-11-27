@@ -78,3 +78,4 @@ jobs:
       with:
         artifacts: "~/.cargo/bin/${{ matrix.crate_name }}"
         tag: crate_${{ matrix.crate_name }}_${{ env.TIMESTAMP }}
+        name: ${{ matrix.crate_name }}
