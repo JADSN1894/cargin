@@ -39,8 +39,8 @@ jobs:
     - name: Use orhun/git-cliff-action
       uses: orhun/git-cliff-action@v2
 
-    - name: Generate Release Notes
-      run: git-cliff
+    - name: Install git-cliff
+      run: cargo install git-cliff
 
     - name: Set up Git
       run: |
