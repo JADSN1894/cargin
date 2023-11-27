@@ -19,7 +19,6 @@ jobs:
     strategy:
       matrix:
         crate_name:
-          - icx-cert
           - just
 
     steps:
@@ -39,11 +38,6 @@ jobs:
     - name: Generate Release Notes
       run: git-cliff
 
-    - name: Set up Git
-      run: |
-        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-        git config --global user.name "${GITHUB_ACTOR}"
-
     - name: Create and Push Tag
       run: git tag -a v${{ matrix.crate_name }} -m "Release v${{ matrix.crate_name }}"
       if: github.event_name == 'push'
@@ -55,7 +49,7 @@ jobs:
     - name: Release
       uses: ncipollo/release-action@v1
       with:
-        token: ${{ secrets.CARGIN_SECRET_TOKEN }}
+        token: ${{ secrets.CARGIN_TOKEN }}
         tag: v${{ matrix.crate_name }}
         title: Release v${{ matrix.crate_name }}
         name: Release v${{ matrix.crate_name }}
