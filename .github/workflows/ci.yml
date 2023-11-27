@@ -14,37 +14,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        package:
-          #- icx-asset
-          #- icx-cert
-          #- icx-proxy
-          - just
-          
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-
-    - name: Set up Rust
-      uses: moonrepo/setup-rust@v1
-      with:
-        channel: stable
-        profile: minimal
-        cache-base: main
-
-    - name: Install Dependencies
-      run: cargo install ${{ matrix.package }}
-
-    - name: Create Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: artifacts-${{ matrix.package }}
-        path: |
-          ~/.cargo/bin/${{ matrix.package }}
   release:
     runs-on: ubuntu-latest
     permissions:
@@ -68,7 +37,7 @@ jobs:
         cache-base: main
 
     - name: Install Dependencies
-      run: cargo install ${{ matrix.package }}
+      run: cargo install ${{ matrix.crate_name }}
       
     - name: Create Artifact
       uses: actions/upload-artifact@v3
