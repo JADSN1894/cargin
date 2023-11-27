@@ -46,37 +46,35 @@ jobs:
       run: cargo install ${{ matrix.crate_name }}
       
     - name: Create Artifact
+      run: |
+        mkdir -p combined_artifacts
+        cp ~/.cargo/bin/${{ matrix.crate_name }} combined_artifacts/
+      if: matrix.crate_name == 'icx-proxy'
+
+    - name: Upload Combined Artifact
       uses: actions/upload-artifact@v3
-      #with: # Alternative 1
-      #name: rust-artifacts
-      #  path: |
-      #    ~/.cargo/bin/crate_1
-      #    ~/.cargo/bin/crate_2
-      with: # Alternative 2
-        name: ${{ matrix.crate_name }}
-        path: |
-          ~/.cargo/bin/${{ matrix.crate_name }} 
-      #with: # Alternative 3
-      #  name: rust-artifacts
-      #  path: ~/.cargo/bin
+      with:
+        name: rust-artifact-combined-${{ env.TIMESTAMP }}
+        path: combined_artifacts
 
     - name: Set up Git
       run: |
         git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
         git config --global user.name "${GITHUB_ACTOR}"
-      
+
     - name: Create and Push Tag
-      run: git tag -a crates-${{ env.TIMESTAMP }} -m "Crates release ${GITHUB_SHA}"
+      run: git tag -a combined_release_${{ env.TIMESTAMP }} -m "Combined release ${GITHUB_SHA}"
       if: github.event_name == 'push'
 
     - name: Push Tag
-      run: git push origin crates-${{ env.TIMESTAMP }}
+      run: git push origin combined_release_${{ env.TIMESTAMP }}
       if: github.event_name == 'push'
 
     - name: Release
       uses: ncipollo/release-action@v1
       with:
         artifacts: combined_artifacts
-        tag: crates-${{ env.TIMESTAMP }}
-        name: Crates Release
-      if: github.event_name == 'push' && matrix.crate_name == 'icx-proxy'
+        tag: combined_release_${{ env.TIMESTAMP }}
+        name: Combined Release
+      if: github.event_name == 'push'
+      
