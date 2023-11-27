@@ -49,7 +49,6 @@ jobs:
       run: |
         mkdir -p combined_artifacts
         cp ~/.cargo/bin/${{ matrix.crate_name }} combined_artifacts/
-      if: matrix.crate_name == 'icx-proxy'
 
     - name: Upload Combined Artifact
       uses: actions/upload-artifact@v3
@@ -64,11 +63,9 @@ jobs:
 
     - name: Create and Push Tag
       run: git tag -a combined_release_${{ env.TIMESTAMP }} -m "Combined release ${GITHUB_SHA}"
-      if: github.event_name == 'push'
 
     - name: Push Tag
       run: git push origin combined_release_${{ env.TIMESTAMP }}
-      if: github.event_name == 'push'
 
     - name: Release
       uses: ncipollo/release-action@v1
@@ -76,5 +73,3 @@ jobs:
         artifacts: combined_artifacts
         tag: combined_release_${{ env.TIMESTAMP }}
         name: Combined Release
-      if: github.event_name == 'push'
-      
