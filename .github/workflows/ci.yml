@@ -1,0 +1,64 @@
+name: Multi-Crate Release
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '59 23 28-31 * *'  # Runs at 11:00 PM UTC on the 28th, 29th, 30th, and 31st day of each month
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crate_name:
+          - icx-cert
+          - just
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Rust
+      uses: moonrepo/setup-rust@v1
+      with:
+        channel: stable
+        profile: minimal
+        cache-base: main
+
+    - name: Install git-cliff
+      run: cargo install git-cliff
+
+    - name: Generate Release Notes
+      run: git-cliff
+
+    - name: Set up Git
+      run: |
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git config --global user.name "${GITHUB_ACTOR}"
+
+    - name: Create and Push Tag
+      run: git tag -a v${{ matrix.crate_name }} -m "Release v${{ matrix.crate_name }}"
+      if: github.event_name == 'push'
+
+    - name: Push Tag
+      run: git push origin v${{ matrix.crate_name }}
+      if: github.event_name == 'push'
+
+    - name: Release
+      uses: ncipollo/release-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: v${{ matrix.crate_name }}
+        title: Release v${{ matrix.crate_name }}
+        name: Release v${{ matrix.crate_name }}
+        files: |
+          ~/.cargo/bin
+        body_file: RELEASE_NOTES.md
