@@ -9,7 +9,7 @@ on:
     - cron: '59 23 28-31 * *'
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,10 +26,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Get Timestamp
-      id: timestamp
-      run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
-
     - name: Set up Rust
       uses: moonrepo/setup-rust@v1
       with:
@@ -39,14 +35,25 @@ jobs:
 
     - name: Install Dependencies
       run: cargo install ${{ matrix.crate_name }}
+  
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
 
+    steps:
+    
+    - name: Get Timestamp
+      id: timestamp
+      run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+      
     - name: Create Artifact
       run: |
         mkdir -p combined_artifacts
         cp -rf ~/.cargo/bin/icx-asset combined_artifacts/
         cp -rf ~/.cargo/bin/icx-cert combined_artifacts/
         cp -rf ~/.cargo/bin/icx-proxy combined_artifacts/
-      if: matrix.crate_name == 'icx-proxy'
 
     - name: Upload Combined Artifacts
       uses: actions/upload-artifact@v3
@@ -61,11 +68,9 @@ jobs:
 
     - name: Create and Push Tag
       run: git tag -a combined_release_${{ env.TIMESTAMP }} -m "Combined release ${GITHUB_SHA}"
-      if: github.event_name == 'push'
 
     - name: Push Tag
       run: git push origin combined_release_${{ env.TIMESTAMP }}
-      if: github.event_name == 'push'
 
     - name: Release
       uses: ncipollo/release-action@v1
@@ -73,4 +78,3 @@ jobs:
         artifacts: combined_artifacts
         tag: combined_release_${{ env.TIMESTAMP }}
         name: Combined Release
-      if: github.event_name == 'push'
