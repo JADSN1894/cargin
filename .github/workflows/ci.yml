@@ -21,7 +21,9 @@ jobs:
     strategy:
       matrix:
         crate_name:
-          - just
+          - icx-asset
+          - icx-cert
+          - icx-proxy
 
     steps:
     - name: Checkout code
@@ -29,13 +31,17 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Get Timestamp
+      id: timestamp
+      run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+      
     - name: Set up Rust
       uses: moonrepo/setup-rust@v1
       with:
         channel: stable
         profile: minimal
         cache-base: main
-
+      
     - name: Install Dependencies
       run: cargo install ${{ matrix.crate_name }}
       
@@ -46,22 +52,18 @@ jobs:
       #  path: |
       #    ~/.cargo/bin/crate_1
       #    ~/.cargo/bin/crate_2
-      #with: # Alternative 2
-      #  name: artifacts-${{ matrix.package }}
-      #  path: |
-      #    ~/.cargo/bin/${{ matrix.package }} 
-      with: # Alternative 3
-        name: rust-artifacts
-        path: ~/.cargo/bin
+      with: # Alternative 2
+        name: ${{ matrix.crate_name }}
+        path: |
+          ~/.cargo/bin/${{ matrix.crate_name }} 
+      #with: # Alternative 3
+      #  name: rust-artifacts
+      #  path: ~/.cargo/bin
 
     - name: Set up Git
       run: |
         git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
         git config --global user.name "${GITHUB_ACTOR}"
-
-    - name: Get Timestamp
-      id: timestamp
-      run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
       
     - name: Create and Push Tag
       run: git tag -a crate-${{ matrix.crate_name }}-${{ env.TIMESTAMP }} -m "Release crate-${{ matrix.crate_name }}-${{ env.TIMESTAMP }}"
