@@ -20,9 +20,10 @@ jobs:
     strategy:
       matrix:
         package:
-          - icx-asset
-          - icx-cert
-          - icx-proxy
+          #- icx-asset
+          #- icx-cert
+          #- icx-proxy
+          - just
           
     steps:
     - name: Checkout Repository
@@ -37,9 +38,6 @@ jobs:
 
     - name: Install Dependencies
       run: cargo install ${{ matrix.package }}
-      
-    - name: Add Execute Permission
-      run: chmod +x ~/.cargo/bin/${{ matrix.package }}
 
     - name: Create Artifact
       uses: actions/upload-artifact@v3
@@ -47,3 +45,64 @@ jobs:
         name: artifacts-${{ matrix.package }}
         path: |
           ~/.cargo/bin/${{ matrix.package }}
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        crate_name:
+          - just
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Rust
+      uses: moonrepo/setup-rust@v1
+      with:
+        channel: stable
+        profile: minimal
+        cache-base: main
+
+    - name: Install Dependencies
+      run: cargo install ${{ matrix.package }}
+      
+    - name: Create Artifact
+      uses: actions/upload-artifact@v3
+      #with: # Alternative 1
+      #name: rust-artifacts
+      #  path: |
+      #    ~/.cargo/bin/crate_1
+      #    ~/.cargo/bin/crate_2
+      #with: # Alternative 2
+      #  name: artifacts-${{ matrix.package }}
+      #  path: |
+      #    ~/.cargo/bin/${{ matrix.package }} 
+      with: # Alternative 3
+        name: rust-artifacts
+        path: ~/.cargo/bin
+        
+    - name: Use orhun/git-cliff-action
+      uses: orhun/git-cliff-action@v2
+
+    - name: Set up Git
+      run: |
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git config --global user.name "${GITHUB_ACTOR}"
+        
+    - name: Create and Push Tag
+      run: git tag -a crate-${{ matrix.crate_name }} -m "Release crate-${{ matrix.crate_name }}"
+      if: github.event_name == 'push'
+
+    - name: Push Tag
+      run: git push origin crate-${{ matrix.crate_name }}
+      if: github.event_name == 'push'
+
+    - name: Release
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "~/.cargo/bin/*"
+        bodyFile: "RELEASE_NOTES.md"
