@@ -61,15 +61,15 @@ jobs:
     # Add a condition to only execute the following steps for the last matrix job
     - name: Build and Push Combined Tag
       run: |
-        if [ "${{ matrix.crate_name }}" == "icx-proxy" ]; then
           mkdir -p combined_artifacts
-          cp -r ~/.cargo/bin/* combined_artifacts/
+          cp -r ~/.cargo/bin/icx-asset combined_artifacts/
+          cp -r ~/.cargo/bin/icx-cert combined_artifacts/
+          cp -r ~/.cargo/bin/icx-proxy combined_artifacts/
           git add combined_artifacts
           git commit -m "Add combined artifacts"
           git tag -a combined_release_${{ env.TIMESTAMP }} -m "Combined release ${GITHUB_SHA}"
           git push origin combined_release_${{ env.TIMESTAMP }}
-        fi
-      if: github.event_name == 'push' && matrix.crate_name == 'icx-proxy'
+      if: github.event_name == 'push'
 
     - name: Release
       uses: ncipollo/release-action@v1
@@ -77,4 +77,4 @@ jobs:
         artifacts: "combined_artifacts"
         tag: combined_release_${{ env.TIMESTAMP }}
         name: Combined Release
-      if: github.event_name == 'push' && matrix.crate_name == 'icx-proxy'
+      if: github.event_name == 'push'
