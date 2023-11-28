@@ -86,7 +86,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: 'Combined Airtifacts'
-        path: ./combined_artifacts/*
+        path: ./combined_artifacts
 
     - name: Release
       uses: ncipollo/release-action@v1
