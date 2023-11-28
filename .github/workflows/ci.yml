@@ -26,6 +26,10 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Get Timestamp
+      id: timestamp
+      run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+      
     - name: pre-install
       run: |
           sudo apt-get update
@@ -47,7 +51,7 @@ jobs:
     - name: Upload Combined Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: rust-artifacts-${{ env.TIMESTAMP }}
+        name: ${{matrix.crate_name}}
         path: combined_artifacts/${{matrix.crate_name}}
 
   release:
@@ -55,13 +59,20 @@ jobs:
     needs: build
     permissions:
       contents: write
+
+    strategy:
+      matrix:
+        crate_name:
+          - icx-asset
+          - icx-cert
+          - icx-proxy
   
     steps:
     - name: Download Combined Artifacts
       uses: actions/download-artifact@v3
       with:
-        name: rust-artifacts-${{ env.TIMESTAMP }}
-        path: combined_artifacts
+        name: ${{matrix.crate_name}}
+        path:  combined_artifacts/${{matrix.crate_name}}
 
     - name: Get Timestamp
       id: timestamp
@@ -71,7 +82,10 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ./combined_artifacts/icx-asset ./combined_artifacts/icx-cert ./combined_artifacts/icx-proxy
+        file: |
+          ./combined_artifacts/icx-asset
+          ./combined_artifacts/icx-cert
+          ./combined_artifacts/icx-proxy
         asset_name: combined_release_${{ env.TIMESTAMP }}
         tag: ${{ github.ref }}
         overwrite: true
