@@ -72,7 +72,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: ${{matrix.crate_name}}
-        path:  combined_artifacts/${{matrix.crate_name}}
+        path: ./combined_artifacts/${{matrix.crate_name}}
 
     - name: Get Timestamp
       id: timestamp
