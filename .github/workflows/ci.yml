@@ -34,25 +34,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential musl-tools
-        CRATE_VERSION=$(cargo metadata --format-version 1 | jq -r ".packages[] | select(.name==\"${{ matrix.crate_name }}\") | .version")
-        echo ${{ CRATE_VERSION }}
+        echo "CRATE_VERSION=$(cargo metadata --format-version 1 | jq -r ".packages[] | select(.name==\"${{ matrix.crate_name }}\") | .version")" >> $GITHUB_ENV
+        run: echo "My variable value is $CRATE_VERSION"
         rustup target add x86_64-unknown-linux-musl
-
-    - name: Install Dependencies
-      run: |
-        cargo install ${{ matrix.crate_name }} --target x86_64-unknown-linux-musl
-        echo "CRATE_VERSION=${CRATE_VERSION}" >> $GITHUB_ENV
-    
-    - name: Strip Debug Symbols
-      run: strip ~/.cargo/bin/${{matrix.crate_name}}
-
-    - name: Copy files
-      run: |
-        mkdir -p combined_artifacts
-        cp -rfv ~/.cargo/bin/${{matrix.crate_name}} combined_artifacts/${{matrix.crate_name}}-${{ env.CRATE_VERSION }}
-
-    - name: Upload Combined Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: 'Combined Airtifacts'
-        path: ./combined_artifacts/${{ matrix.crate_name }}-${{ env.CRATE_VERSION }}
+   
