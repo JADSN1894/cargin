@@ -39,5 +39,11 @@ jobs:
     - name: Install Dependencies
       run: |
         cargo install ${{ matrix.crate_name }} --target x86_64-unknown-linux-musl
-        echo "CRATE_VERSION=$(cargo metadata --format-version 1 | jq -r ".packages[] | select(.name==\"${{ matrix.crate_name }}\") | .version")" >> $GITHUB_ENV
-        run: echo "My variable value is $CRATE_VERSION"
+      env:
+        CARGO_HOME: ${{ github.workspace }}/cargo
+        PATH: ${{ github.workspace }}/cargo/bin:$PATH
+
+    - name: Get Binary Version
+      run: |
+        version=$(${{ matrix.crate_name }} --version)
+        echo "Binary Version: $version"
