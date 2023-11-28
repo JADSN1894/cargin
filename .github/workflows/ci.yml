@@ -52,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{matrix.crate_name}}
-        path: ~/combined_artifacts/${{matrix.crate_name}}
+        path: ./combined_artifacts/${{matrix.crate_name}}
 
   release:
     runs-on: ubuntu-latest
@@ -64,8 +64,8 @@ jobs:
     - name: Download Combined Artifacts
       uses: actions/download-artifact@v3
       with:
-        name: ${{matrix.crate_name}}
-        path: ~/combined_artifacts
+        name: Cobined Airtifacts
+        path: ./combined_artifacts
 
     - name: Get Timestamp
       id: timestamp
@@ -73,10 +73,23 @@ jobs:
       
     - name: Set up Git
       run: |
-        git config user.email "actions@github.com"
-        git config user.name "GitHub Actions"
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git config --global user.name "${GITHUB_ACTOR}"
+        
+    - name: Create and Push Tag
+      run: git tag -a crates_${{ env.TIMESTAMP }} -m "Combined release ${GITHUB_SHA}"
+      if: github.event_name == 'push'
 
-    - name: Create Release
-      run: |
-        gh release create v1.0.0 ~/combined_artifacts/*
+    - name: Push Tag
+      run: git push origin crates_${{ env.TIMESTAMP }}
+      if: github.event_name == 'push'
+
+    - name: Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "./combined_artifacts/icx-asset, ./combined_artifacts/icx-cert, ./combined_artifacts/icx-proxy"
+        tag: crates_${{ env.TIMESTAMP }}
+        name: Combined Release
+      if: github.event_name == 'push'
+      
 
