@@ -37,7 +37,7 @@ jobs:
         cargo install ${{matrix.crate_name}} --target x86_64-unknown-linux-musl
     
     - name: Strip Debug Symbols
-      run: strip --target ${{ matrix.target }}
+      run: strip ~/.cargo/bin/${{ env.BINARY_NAME }}
 
     - name: Copy files
       run: |
