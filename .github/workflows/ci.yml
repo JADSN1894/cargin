@@ -61,16 +61,15 @@ jobs:
       contents: write
   
     steps:
-    - name: Download Combined Artifacts
-      uses: actions/download-artifact@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
-        name: 'Combined Airtifacts'
-        path: ./combined_artifacts
-
+        fetch-depth: 0
+        
     - name: Get Timestamp
       id: timestamp
       run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
-      
+
     - name: Set up Git
       run: |
         git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
@@ -84,12 +83,17 @@ jobs:
       run: git push origin crates_${{ env.TIMESTAMP }}
       if: github.event_name == 'push'
 
+    - name: Download Combined Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: 'Combined Airtifacts'
+        path: ./combined_artifacts
+
     - name: Release
       uses: ncipollo/release-action@v1
       with:
         artifacts: "./combined_artifacts/icx-asset, ./combined_artifacts/icx-cert, ./combined_artifacts/icx-proxy"
         tag: crates_${{ env.TIMESTAMP }}
         name: Combined Release
-      if: github.event_name == 'push'
-      
+      if: github.event_name == 'push'      
 
