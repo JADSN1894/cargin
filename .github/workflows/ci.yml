@@ -52,27 +52,20 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{matrix.crate_name}}
-        path: combined_artifacts/${{matrix.crate_name}}
+        path: ./combined_artifacts/${{matrix.crate_name}}
 
   release:
     runs-on: ubuntu-latest
     needs: build
     permissions:
       contents: write
-
-    strategy:
-      matrix:
-        crate_name:
-          - icx-asset
-          - icx-cert
-          - icx-proxy
   
     steps:
     - name: Download Combined Artifacts
       uses: actions/download-artifact@v3
       with:
         name: ${{matrix.crate_name}}
-        path: ./combined_artifacts/${{matrix.crate_name}}
+        path: ~/combined_artifacts
 
     - name: Get Timestamp
       id: timestamp
@@ -83,9 +76,9 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: |
-          ./combined_artifacts/icx-asset
-          ./combined_artifacts/icx-cert
-          ./combined_artifacts/icx-proxy
-        asset_name: combined_release_${{ env.TIMESTAMP }}
+          ~/combined_artifacts/icx-asset
+          ~/combined_artifacts/icx-cert
+          ~/combined_artifacts/icx-proxy
+        asset_name: crates_${{ env.TIMESTAMP }}
         tag: crates-${{ env.TIMESTAMP }}
         overwrite: true
