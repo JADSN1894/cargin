@@ -65,8 +65,8 @@ jobs:
     - name: Upload crates to release
       uses: svenstaro/upload-release-action@v2
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: combined_artifacts/*
+        repo_token: ${{ secrets.CARGIN_TOKEN }}
+        file: ./combined_artifacts/*
         asset_name: combined_release_${{ env.TIMESTAMP }}
         tag: ${{ github.ref }}
         overwrite: true
