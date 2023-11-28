@@ -64,7 +64,7 @@ jobs:
     - name: Download Combined Artifacts
       uses: actions/download-artifact@v3
       with:
-        name: Cobined Airtifacts
+        name: 'Combined Airtifacts'
         path: ./combined_artifacts
 
     - name: Get Timestamp
