@@ -87,5 +87,5 @@ jobs:
           ./combined_artifacts/icx-cert
           ./combined_artifacts/icx-proxy
         asset_name: combined_release_${{ env.TIMESTAMP }}
-        tag: ${{ github.ref/refs\/tags\//'' }}
+        tag: crates-${{ env.TIMESTAMP }}
         overwrite: true
