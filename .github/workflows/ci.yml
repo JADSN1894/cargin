@@ -35,7 +35,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential musl-tools
         CRATE_VERSION=$(cargo install --list | grep "${{ matrix.crate_name }}" | cut -d ' ' -f 1)
-        echo ${{CRATE_VERSION}}
+        echo ${{ CRATE_VERSION }}
         rustup target add x86_64-unknown-linux-musl
 
     - name: Install Dependencies
@@ -49,10 +49,10 @@ jobs:
     - name: Copy files
       run: |
         mkdir -p combined_artifacts
-        cp -rfv ~/.cargo/bin/${{matrix.crate_name}} combined_artifacts/${{matrix.crate_name}}_${{ env.CRATE_VERSION }}
+        cp -rfv ~/.cargo/bin/${{matrix.crate_name}} combined_artifacts/${{matrix.crate_name}}-${{ env.CRATE_VERSION }}
 
     - name: Upload Combined Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: 'Combined Airtifacts'
-        path: ./combined_artifacts/${{ matrix.crate_name }}_${{ env.CRATE_VERSION }}
+        path: ./combined_artifacts/${{ matrix.crate_name }}-${{ env.CRATE_VERSION }}
