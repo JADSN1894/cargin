@@ -16,9 +16,9 @@ jobs:
     strategy:
       matrix:
         crate_name:
-          #- icx-asset
+          - icx-asset
           - icx-cert
-          #- icx-proxy
+          - icx-proxy
 
     steps:
     - name: Checkout code
@@ -32,15 +32,66 @@ jobs:
       
     - name: pre-install
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential musl-tools        
-        rustup target add x86_64-unknown-linux-musl
-   
+          sudo apt-get update
+          sudo apt-get install -y build-essential musl-tools
+          rustup target add x86_64-unknown-linux-musl
+          
     - name: Install Dependencies
       run: |
-        cargo install ${{ matrix.crate_name }} --target x86_64-unknown-linux-musl
+        cargo install ${{matrix.crate_name}} --target x86_64-unknown-linux-musl
+    
+    - name: Strip Debug Symbols
+      run: strip ~/.cargo/bin/${{matrix.crate_name}}
 
-    - name: Get Binary Version
+    - name: Copy files
       run: |
-        CRATE_VERSION=$(${{ matrix.crate_name }} --version)
-        echo "Binary Version: $CRATE_VERSION"
+        mkdir -p combined_artifacts
+        cp -rfv ~/.cargo/bin/${{matrix.crate_name}} combined_artifacts/${{matrix.crate_name}}
+    - name: Upload Combined Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: 'Combined Airtifacts'
+        path: ./combined_artifacts/${{matrix.crate_name}}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+  
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Get Timestamp
+      id: timestamp
+      run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+    - name: Set up Git
+      run: |
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git config --global user.name "${GITHUB_ACTOR}"
+        
+    - name: Create and Push Tag
+      run: git tag -a crates_${{ env.TIMESTAMP }} -m "Combined release ${GITHUB_SHA}"
+      if: github.event_name == 'push'
+
+    - name: Push Tag
+      run: git push origin crates_${{ env.TIMESTAMP }}
+      if: github.event_name == 'push'
+
+    - name: Download Combined Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: 'Combined Airtifacts'
+        path: ./combined_artifacts/*
+
+    - name: Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "./combined_artifacts/icx-asset, ./combined_artifacts/icx-cert, ./combined_artifacts/icx-proxy"
+        tag: crates_${{ env.TIMESTAMP }}
+        name: Combined Release
+      if: github.event_name == 'push'      
