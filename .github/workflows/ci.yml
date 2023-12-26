@@ -19,8 +19,6 @@ jobs:
           - icx-asset
           - icx-cert
           - icx-proxy
-          - sea-orm-cli
-          - loco-cli
 
     steps:
     - name: Checkout code
@@ -35,10 +33,12 @@ jobs:
     - name: pre-install
       run: |
           sudo apt-get update
+          sudo apt-get install -y build-essential musl-tools
+          rustup target add x86_64-unknown-linux-musl
           
     - name: Install Dependencies
       run: |
-        cargo install ${{matrix.crate_name}}
+        cargo install ${{matrix.crate_name}} --target x86_64-unknown-linux-musl
     
     - name: Strip Debug Symbols
       run: strip ~/.cargo/bin/${{matrix.crate_name}}
@@ -91,7 +91,7 @@ jobs:
     - name: Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "./combined_artifacts/icx-asset, ./combined_artifacts/icx-cert, ./combined_artifacts/icx-proxy, ./combined_artifacts/sea-orm-cli, ./combined_artifacts/loco-cli"
+        artifacts: "./combined_artifacts/icx-asset, ./combined_artifacts/icx-cert, ./combined_artifacts/icx-proxy"
         tag: crates_${{ env.TIMESTAMP }}
         name: Combined Release
-      if: github.event_name == 'push'      
+      if: github.event_name == 'push' 
