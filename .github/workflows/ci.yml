@@ -19,6 +19,8 @@ jobs:
           - icx-asset
           - icx-cert
           - icx-proxy
+          - sea-orm-cli
+          - loco-cli
 
     steps:
     - name: Checkout code
